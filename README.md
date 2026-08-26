@@ -11,8 +11,15 @@ https://github.com/Klerith/fernando-skills
 
 ## Skills usadas
 
+**Spec-Skills**
 ```bash
 npx skills@latest add Klerith/fernando-skills
 ```
 
+**Frontend-skill-anthropics**
+```bash
+npx skills add https://github.com/anthropics/skills --skill frontend-design
+```
+
 ## hello word!!!
+

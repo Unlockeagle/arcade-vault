@@ -17,6 +17,7 @@ Built with **Spec Driven Design** using the `/spec` and `/spec-impl` skills from
 [Klerith/fernando-skills](https://github.com/Klerith/fernando-skills) (`npx skills@latest add Klerith/fernando-skills`).
 When asked to implement a feature, check whether a spec workflow is expected before jumping straight to code.
 
+
 ## ⚠️ Next.js version is non-standard — read docs first
 
 This repo pins `next@16.3.3`, a version with breaking changes not reflected in your training data.
@@ -48,6 +49,9 @@ npm run lint    # eslint via eslint-config-next (flat config)
 ```
 
 There is no test script/framework configured yet.
+
+## Skills
+Usa siempre /frontend-design para diseñar interfaces de usuario.
 
 ## Architecture
 
