@@ -1,7 +1,7 @@
 "use client";
 
 // lib/auth.ts — mock de sesión en localStorage (sin backend)
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 export type MockUser = { name: string };
 
@@ -9,6 +9,7 @@ export type ScoreEntry = { game: string; score: number; name: string; at: number
 
 const USER_KEY = "av_user";
 const SCORES_KEY = "av_scores";
+const USER_CHANGED_EVENT = "av_user_changed";
 
 export function getStoredUser(): MockUser | null {
   try {
@@ -25,6 +26,7 @@ export function setStoredUser(user: MockUser | null): void {
   } catch {
     // localStorage no disponible (modo privado/SSR): la sesión simplemente no persiste.
   }
+  window.dispatchEvent(new Event(USER_CHANGED_EVENT));
 }
 
 export function saveScore(entry: Omit<ScoreEntry, "at">): void {
@@ -37,22 +39,52 @@ export function saveScore(entry: Omit<ScoreEntry, "at">): void {
   }
 }
 
-// Hook de sesión mock (client-side). Lee av_user en el primer render de cliente
-// para evitar desajustes de hidratación con el render de servidor.
-export function useMockUser() {
-  const [user, setUser] = useState<MockUser | null>(null);
+// Snapshot cacheado de av_user: useSyncExternalStore exige que getSnapshot
+// devuelva la misma referencia mientras el valor subyacente no cambie.
+let cachedUserRaw: string | null = null;
+let cachedUser: MockUser | null = null;
 
-  useEffect(() => {
-    setUser(getStoredUser());
-  }, []);
+function readSnapshot(): MockUser | null {
+  let raw: string | null;
+  try {
+    raw = localStorage.getItem(USER_KEY);
+  } catch {
+    raw = null;
+  }
+  if (raw !== cachedUserRaw) {
+    cachedUserRaw = raw;
+    try {
+      cachedUser = raw ? JSON.parse(raw) : null;
+    } catch {
+      cachedUser = null;
+    }
+  }
+  return cachedUser;
+}
+
+function getServerSnapshot(): MockUser | null {
+  return null;
+}
+
+function subscribe(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener(USER_CHANGED_EVENT, callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(USER_CHANGED_EVENT, callback);
+  };
+}
+
+// Hook de sesión mock (client-side), sincronizado con av_user en localStorage
+// (incluso entre pestañas) vía useSyncExternalStore.
+export function useMockUser() {
+  const user = useSyncExternalStore(subscribe, readSnapshot, getServerSnapshot);
 
   const login = useCallback((u: MockUser | null) => {
-    setUser(u);
     setStoredUser(u);
   }, []);
 
   const signOut = useCallback(() => {
-    setUser(null);
     setStoredUser(null);
   }, []);
 
