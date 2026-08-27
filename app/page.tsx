@@ -1,64 +1,62 @@
-"use client";
+// app/page.tsx — Landing (SPEC 02): hero retro-arcade con fondo animado de monedas y figuras.
+// Server component: sin estado ni eventos, solo CSS animations + Link a /games.
+import Link from "next/link";
 
-// app/page.tsx — Biblioteca, portado de references/templates/Arcade Vault.html (contenido real: Library)
-import { useMemo, useState } from "react";
-import GameCard from "@/components/GameCard";
-import { CATS, GAMES } from "@/lib/data";
+type FloatingIcon = {
+  emoji: string;
+  top: string;
+  left: string;
+  size: number;
+  delay: string;
+  duration: string;
+};
+
+// Valores fijos (no Math.random()) para que el HTML de servidor y cliente coincidan exactamente.
+const FLOATING_ICONS: FloatingIcon[] = [
+  { emoji: "🪙", top: "10%", left: "8%", size: 34, delay: "0s", duration: "8s" },
+  { emoji: "👾", top: "18%", left: "82%", size: 42, delay: "0.6s", duration: "10s" },
+  { emoji: "🕹️", top: "68%", left: "12%", size: 40, delay: "1.2s", duration: "9s" },
+  { emoji: "🪙", top: "76%", left: "88%", size: 28, delay: "0.3s", duration: "7s" },
+  { emoji: "👻", top: "6%", left: "48%", size: 36, delay: "1.8s", duration: "11s" },
+  { emoji: "🎮", top: "42%", left: "5%", size: 30, delay: "0.9s", duration: "8.5s" },
+  { emoji: "🪙", top: "32%", left: "92%", size: 24, delay: "2.1s", duration: "6.5s" },
+  { emoji: "👾", top: "84%", left: "40%", size: 32, delay: "1.5s", duration: "9.5s" },
+  { emoji: "🕹️", top: "22%", left: "28%", size: 26, delay: "2.4s", duration: "7.5s" },
+  { emoji: "🪙", top: "58%", left: "70%", size: 38, delay: "0.4s", duration: "10.5s" },
+  { emoji: "👻", top: "90%", left: "68%", size: 30, delay: "1.1s", duration: "8s" },
+  { emoji: "🎮", top: "50%", left: "50%", size: 22, delay: "1.9s", duration: "6s" },
+];
 
 export default function Home() {
-  const [q, setQ] = useState("");
-  const [cat, setCat] = useState<(typeof CATS)[number]>("TODOS");
-
-  const filtered = useMemo(() => {
-    return GAMES.filter(
-      (g) => (cat === "TODOS" || g.cat === cat) && g.title.toLowerCase().includes(q.toLowerCase())
-    );
-  }, [q, cat]);
-
   return (
-    <div className="fade-in">
-      <section className="av-hero">
+    <div className="fade-in av-landing">
+      <div className="av-landing-bg" aria-hidden="true">
+        {FLOATING_ICONS.map((icon, i) => (
+          <span
+            key={i}
+            className="av-floating-icon"
+            style={{
+              top: icon.top,
+              left: icon.left,
+              fontSize: icon.size,
+              animationDelay: icon.delay,
+              animationDuration: icon.duration,
+            }}
+          >
+            {icon.emoji}
+          </span>
+        ))}
+      </div>
+
+      <section className="av-landing-hero">
         <h1 className="flicker">ARCADE VAULT</h1>
         <div className="sub">
-          INSERTA UNA MONEDA PARA JUGAR <span className="blink">_</span>
+          TU BIBLIOTECA RETRO DE SIEMPRE <span className="blink">_</span>
         </div>
+        <Link href="/games" className="btn lg">
+          JUGAR AHORA
+        </Link>
       </section>
-
-      <div className="av-filters">
-        <div className="av-search">
-          <span className="ico">⌕</span>
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar un juego por nombre…"
-          />
-        </div>
-        <div className="av-chips">
-          {CATS.map((c) => (
-            <button
-              key={c}
-              className={"chip" + (cat === c ? " active" : "")}
-              onClick={() => setCat(c)}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="av-grid">
-        {filtered.map((g) => (
-          <GameCard key={g.id} game={g} />
-        ))}
-        {filtered.length === 0 && (
-          <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: 80, color: "var(--ink-faint)" }}>
-            <div className="pixel" style={{ fontSize: 14, color: "var(--magenta)", marginBottom: 12 }}>
-              NO HAY RESULTADOS
-            </div>
-            <div>Intenta otra búsqueda o categoría.</div>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

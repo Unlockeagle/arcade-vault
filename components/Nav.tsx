@@ -12,8 +12,11 @@ export default function Nav() {
   const router = useRouter();
   const { user, signOut } = useMockUser();
 
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" || pathname.startsWith("/juego") : pathname.startsWith(href);
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    if (href === "/games") return pathname === "/games" || pathname.startsWith("/juego");
+    return pathname.startsWith(href);
+  };
 
   const close = () => setOpen(false);
 
@@ -28,6 +31,9 @@ export default function Nav() {
         </Link>
         <div className="links">
           <Link href="/" className={isActive("/") ? "active" : ""}>
+            Inicio
+          </Link>
+          <Link href="/games" className={isActive("/games") ? "active" : ""}>
             Biblioteca
           </Link>
           <Link href="/salon-de-la-fama" className={isActive("/salon-de-la-fama") ? "active" : ""}>
@@ -44,7 +50,7 @@ export default function Nav() {
             className="btn ghost auth-btn"
             onClick={() => {
               signOut();
-              router.push("/");
+              router.push("/games");
             }}
           >
             {user.name} ▾
@@ -65,6 +71,9 @@ export default function Nav() {
           MENÚ
         </div>
         <Link href="/" className={isActive("/") ? "active" : ""} onClick={close}>
+          Inicio
+        </Link>
+        <Link href="/games" className={isActive("/games") ? "active" : ""} onClick={close}>
           Biblioteca
         </Link>
         <Link
